@@ -1,0 +1,70 @@
+version: "3"
+
+networks:
+  front-tier:
+  back-tier:
+
+
+volumes:
+  prometheus_data:
+  grafana_data:
+  devnet_data:
+
+
+services:
+  prometheus:
+    depends_on:
+      - devnet
+    image: prom/prometheus:v2.36.2
+    volumes:
+      - ./prometheus/:/etc/prometheus/
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - 9090:9090
+    networks:
+      - back-tier
+    restart: always
+
+  grafana:
+    image: grafana/grafana
+    depends_on:
+      - prometheus
+      - devnet
+    ports:
+      - 5000:3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+    env_file:
+      - ./grafana/config.monitoring
+    networks:
+      - back-tier
+      - front-tier
+    restart: always
+
+  evmos:
+    image: evmos-dev
+    build: ./evmos-app
+    restart: always
+    networks:
+      - back-tier
+    ports:
+      - 8545:8545
+
+  tx-bot:
+    image: vhomsi/tx-bot
+    ports:
+      - 8080:8080
+    depends_on:
+      - evmos
+    networks:
+      - back-tier
+    environment:
+      - ORCH_PRIV_KEY=0x73d6ab30dad6ff4cfb94ac3502b1b4f6e40a8f50b99e898d8b43cac4607fb9ce
+      - RPC_URL=http://devnet:8545
+    restart: always

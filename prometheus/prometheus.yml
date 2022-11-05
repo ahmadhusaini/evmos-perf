@@ -1,0 +1,34 @@
+# my global config
+global:
+  scrape_interval: 15s # By default, scrape targets every 15 seconds.
+  evaluation_interval: 15s # By default, scrape targets every 15 seconds.
+  external_labels:
+    monitor: "lighthouse-monitor"
+
+remote_write:
+  - url: "http://localhost:8086/api/v1/prom/write?db=prometheus"
+
+remote_read:
+  - url: "http://localhost:8086/api/v1/prom/read?db=prometheus"   
+
+scrape_configs:
+
+  - job_name: 'prometheus'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: "evmos-1"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["localhost:26660/metrics"]
+
+  - job_name: "evmos-2"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["localhost:6065/debug/metrics/prometheus"]
+
+  - job_name: "tx-bot"
+    scrape_interval: 5s
+    static_configs:
+      - targets: ["tx-bot:8080"]

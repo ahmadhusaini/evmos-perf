@@ -1,13 +1,19 @@
 FROM golang:1.19.3-bullseye
 
-COPY . .
+RUN apt-get update -y && apt-get install -y \
+  git \
+  jq \
+  bc
 
-WORKDIR /go/evmos
 
-RUN apt-get update -y
-RUN apt-get install git -y
+WORKDIR /app
 
-RUN apt-get install jq -y
-RUN apt-get install bc -y
-RUN sed -i -e 's/\r$//' local_node.sh
-#ENTRYPOINT [ "./local_node.sh" ]
+RUN git clone 'https://github.com/evmos/evmos.git'
+
+COPY local_node.sh /app/evmos
+
+WORKDIR /app/evmos
+
+# RUN sed -i '$s/$/ --metrics/' local_node.sh
+
+ENTRYPOINT [ "./local_node.sh" ]
