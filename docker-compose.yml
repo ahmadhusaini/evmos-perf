@@ -14,7 +14,8 @@ volumes:
 services:
   prometheus:
     depends_on:
-      - devnet
+      - evmos-devnet
+      - cadvisor
     image: prom/prometheus:v2.36.2
     volumes:
       - ./prometheus/:/etc/prometheus/
@@ -30,11 +31,25 @@ services:
       - back-tier
     restart: always
 
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    ports:
+      - 8080:8080
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - back-tier
+    restart: always
+
   grafana:
     image: grafana/grafana
     depends_on:
       - prometheus
-      - devnet
+      - evmos-devnet
     ports:
       - 5000:3000
     volumes:
@@ -47,8 +62,8 @@ services:
       - front-tier
     restart: always
 
-  evmos:
-    image: evmos-dev
+  evmos-devnet:
+    image: evmos-devnet
     build: ./evmos-app
     restart: always
     networks:
@@ -59,9 +74,9 @@ services:
   tx-bot:
     image: vhomsi/tx-bot
     ports:
-      - 8080:8080
+      - 8081:8080
     depends_on:
-      - evmos
+      - evmos-devnet
     networks:
       - back-tier
     environment:
