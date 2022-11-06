@@ -3,11 +3,8 @@ global:
   scrape_interval: 1s # By default, scrape targets every 1 second
   evaluation_interval: 1s # By default, scrape targets every 1 second
 
-remote_write:
-  - url: "http://localhost:8086/api/v1/prom/write?db=prometheus"
-
-remote_read:
-  - url: "http://localhost:8086/api/v1/prom/read?db=prometheus"   
+# remote_write:
+#   - url: "http://remote-storage-adapter:9201/write"
 
 scrape_configs:
 

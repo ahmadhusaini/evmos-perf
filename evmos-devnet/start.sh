@@ -33,4 +33,4 @@ echo "starting evmos node $i in background ..."
 echo "started evmos node"
 tail -f /dev/null
 
-curl localhost:8545 -X POST -H "Content-Type: application/json" --data '{"method":"eth_getBalance","params":["0x1cF80B60F4F58221AaFFDBb2e513C0Ef1F809494", "latest"],"id":1,"jsonrpc":"2.0"}'
+# curl localhost:8545 -X POST -H "Content-Type: application/json" --data '{"method":"eth_getBalance","params":["0x1cF80B60F4F58221AaFFDBb2e513C0Ef1F809494", "latest"],"id":1,"jsonrpc":"2.0"}'
