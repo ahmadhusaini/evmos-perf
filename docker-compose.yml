@@ -15,7 +15,7 @@ services:
   prometheus:
     depends_on:
       - evmos-devnet
-      - cadvisor
+      # - cadvisor
     image: prom/prometheus:v2.36.2
     volumes:
       - ./prometheus/:/etc/prometheus/
@@ -31,19 +31,19 @@ services:
       - back-tier
     restart: always
 
-  cadvisor:
-    image: gcr.io/cadvisor/cadvisor:latest
-    container_name: cadvisor
-    ports:
-      - 8080:8080
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:rw
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-    networks:
-      - back-tier
-    restart: always
+  # cadvisor:
+  #   image: gcr.io/cadvisor/cadvisor:latest
+  #   container_name: cadvisor
+  #   ports:
+  #     - 8080:8080
+  #   volumes:
+  #     - /:/rootfs:ro
+  #     - /var/run:/var/run:rw
+  #     - /sys:/sys:ro
+  #     - /var/lib/docker/:/var/lib/docker:ro
+  #   networks:
+  #     - back-tier
+  #   restart: always
 
   grafana:
     image: grafana/grafana
@@ -51,7 +51,7 @@ services:
       - prometheus
       - evmos-devnet
     ports:
-      - 5000:3000
+      - 8000:3000
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning/:/etc/grafana/provisioning/
@@ -64,12 +64,17 @@ services:
 
   evmos-devnet:
     image: evmos-devnet
-    build: ./evmos-app
+    build: ./evmos-devnet
     restart: always
     networks:
       - back-tier
     ports:
       - 8545:8545
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://localhost:26657/status"]
+        interval: 30s
+        timeout: 10s
+        retries: 5
 
   tx-bot:
     image: vhomsi/tx-bot
@@ -80,6 +85,6 @@ services:
     networks:
       - back-tier
     environment:
-      - ORCH_PRIV_KEY=0x73d6ab30dad6ff4cfb94ac3502b1b4f6e40a8f50b99e898d8b43cac4607fb9ce
-      - RPC_URL=http://devnet:8545
+      - ORCH_PRIV_KEY=0x1c384b3fb9a1cff8caee1e2d078bb9bc28a542dcc7ac779a445dc68b3dc2fe1f
+      - RPC_URL=http://evmos-devnet:8545
     restart: always
